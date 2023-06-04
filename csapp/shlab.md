@@ -24,4 +24,3 @@ pgid = 0:将组id设置为pid
 ### 进程组id
 fork出的进程如果不设置组id默认与父进程一个组
 
-### git feature 
