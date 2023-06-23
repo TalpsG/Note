@@ -93,11 +93,35 @@ int main(int argc, char *argv[]) {
 
 1. 简单法：将堆划分为多个不同大小的块，大小相同的在一条链表上，分配时不做分割，会产生内部碎片
 2. 分离适配：与简单发类似，分配器维护多个空闲链表，但是在分配的时候会对空闲块进行分割，将剩余的部分插入合适的空闲链表中
-3. 伙伴系统buddy system:
+3. 伙伴系统buddy system: 
 
 
+### gc 垃圾回收
+
+维护一颗二叉树，从根节点（未被其他指针指向的已分配块）开始标记被指向的内存块，通过已分配块二叉树去判断指针是否指向已分配块，标记完成后，回收未标记的已分配块。
 
 
+## homework
+
+1. mmap实现对文件的修改
+
+```c
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+int main() {
+  int fd = open("/home/talps/git_repo/note/csapp/hello.txt", O_RDWR);
+  struct stat temp;
+  fstat(fd, &temp);
+  char *p = (char *)mmap(NULL, temp.st_size, PROT_WRITE | PROT_READ, MAP_SHARED,
+                         fd, 0); //MAP_SHARED 会修改文件
+  *p = 'J';
+  return 0;
+}
+```
 
 
 
