@@ -1,0 +1,3 @@
+record(){
+	pwd > ~/.marco
+}

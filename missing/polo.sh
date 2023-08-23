@@ -1,0 +1,3 @@
+load(){
+	cd "$(cat ~/.marco)"
+}
