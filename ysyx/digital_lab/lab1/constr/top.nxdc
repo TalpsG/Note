@@ -1,0 +1,8 @@
+top=top
+
+select (SW1,SW0)
+a (SW3,SW2)
+b (SW5,SW4)
+c (SW7,SW6)
+d (SW9,SW8)
+out (LD1,LD0)
