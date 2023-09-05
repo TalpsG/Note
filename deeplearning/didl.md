@@ -179,9 +179,9 @@ softmax 函数可以将未规范化的预测变换为非负数并且总和为1,�
 由极大似然估计推导出交叉熵损失函数
 ##### 交叉熵
 熵就是表示事物状态的最小编码长度
-熵的公式为 $entropy = -\sum P_pred(i) \log P_pred(i)$
+熵的公式为 $entropy = -\sum P_p(i) \log P_p(i)$
 
-交叉熵的公式是 $cross entropy = -\sum P_real(i) \log P_pred(i)$
+交叉熵的公式是 $cross entropy = -\sum P_r(i) \log P_p(i)$
 
 $P_r$代表实际的概率，而$P_p$代表预测的概率
 
