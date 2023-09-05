@@ -172,3 +172,159 @@ fsm的设计
 - 写出布尔表达式
 - 设计出电路
 
+#### 时序逻辑电路的timing
+D触发器对边沿的响应被称为对输入的采样.
+当边沿时输入也发生了变化，那么会发生什么？
+所以时序逻辑中输入必须保持一定的时间为了让触发器产生相应的输出
+
+setup time和hold time，分别对应了边沿前后的一段需要输入保持稳定的时间,setup是为了sample,hold是为了sample,在输入改变前就进行采样，如果hold为0是最好的
+
+clock skew: 同一个时钟源到达不同的时序元器件的时间不同
+
+动态设计准则：
+同步时序电路必须在aperture time(setup + hold time)时稳定。
+
+setup time constrait:Tpd<= Tc -(Tpcq+Tsetup)
+解释：在时钟周期内要完成输入信号的稳定，否则到了边沿输入信号可能又会面临改变，影响输入的sample
+Tpcq是时序逻辑的传播时延
+Tccq是时序逻辑的污染时延
+hold time constraint: Tcd>=Thold-Tccq
+解释：当clk上升沿时触发器存储数据需要D hold一段时间，而此时该触发器前面的电路的输出也改变了，导致了该触发器的输入也面临改变，因此需要在输入改变前将输入进行sample
+如果setup时间达不到要求可以提高Tc也就是时钟周期,但是如果holdtime不达标则只能重新设计电路,可以增加buffer以便增加时延使得总时延大于holdtime
+
+亚稳态
+当触发器采样到一个禁区的值的时候，触发器会解决这个问题，存储一个稳态值，但是需要一些时间，且时间是unbounded
+
+每一个双稳态元器件都会在两个稳态之间有一个亚稳态
+
+
+同步器
+输入最好经过同步器，以保证时序元件不会产生亚稳态。
+输入如果在aperture内稳定，则输出也会是稳定的，如果输入在aperture内不稳定，那么在有限时间内会输出一个稳定信号。
+
+#### 并行
+系统的速度是被延迟和信息通过的速度所确定的，我们把token定义为一组输入通过系统产生一组输出
+latency就是指tokens产生的时间
+throughout是指tokens产生的速度
+
+并行分为sptial并行和temporal并行
+spatial是指多个任务同时进行
+而temporal并行是指类似流水线的处理
+
+流水线的烦恼：如果该流水段结果依赖后面的流水段的结果，则会发生冲突。
+
+
+## HDL
+构建module的方法有两种：行为建模和结构建模，行为建模描述了模块做了什么，而结构建模则描述了模块的构成。
+
+y=(~a)(~b)(~c)+(a)(~b)(~c)+(a)(~b)(c)
+
+```systemverilog
+module sillyfunction(
+  input logic a,b,c,
+  output logic y);
+  assign y=~a&~b&~c|a&~b&~c|a&~b&c;
+endmodule
+```
+logic是systemverilog中替代reg的关键字，可以被连续赋值(assign)和过程赋值(structural),编译器会推断logic是wire还是reg,除了会被多重驱动使用的信号，其他地方的reg和wire都应该使用logic替代。
+
+**一个模块应该有很好的模块应用性**
+
+模拟和综合
+
+模拟就是给module一个输入，去检查输出是否正确.
+综合就是将代码描述转换成逻辑门
+
+位操作符：& ~ | 
+
+连续赋值：assign语句，无论右边的元素是否改变，左边都会被重新计算
+
+单目运算符：& |  ^
+
+三目运算符： a?b:c 三目运算符可以嵌套使用 比如`a?(b?c:d):(e?f:g)`
+
+运算符的优先级：
+
+![](./img/operator.png)
+
+
+移位运算符：<<>>是逻辑移位 <<<>>>是算数移位
+
+数字表达式:**`'0`和`’1`会把所有位都填充成0或1**
+
+
+#### Z和X
+z代表浮动的值，常用在三态门中，当ena位0时
+x代表无效的电平，比如总线上的两个三态门都是1导通，则此时的总线上的值为x
+当触发器的输入未被定义时，也会用x来代表初值
+
+`output tri y`表示y是一个三态总线，可以支持多重驱动，当无驱动的时候输出z
+
+#### delay
+可以在assign前加`#n`来延迟几个时间单位来延迟赋值，只用于模拟环节，综合时无效
+
+`timescale 1ns/1ps`前面的是时间单元，后面的是时间精度
+
+延时赋值的时候如果本句assign依赖其他的assign的结果，则会在依赖的assign赋值完成后再去延时赋值
+
+#### 行为建模
+#### 时序逻辑
+寄存器
+`always_ff@(edge)` 敏感信号只能是边沿形式的，而且内部被赋值的元素只能是reg类型而非wire
+
+resettable reg 异步，同步只需要去掉posedge reset就可以了
+```systemverilog
+module flopr(
+  input logic clk,reset,
+  input logic[3:0] d,
+  output logic[3:0] out
+);
+  always_ff@(posedge clk,posedge reset)
+    if (reset) q<=4'b0;
+    else q<=d;
+endmodule
+```
+
+
+D latch 锁存器
+```systemverilog
+module latch(
+  input logic clk,
+  input logic[3:0] d,
+  output logic[3:0] q
+);
+  always_latch
+    if(clk)q<=d;
+endmodule
+```
+`always_latch` 等价于`always@(clk,d)`
+
+
+Inverter
+```systemverilog
+module inv(
+  input logic a,
+  output logic y
+);
+  always_comb
+    y=~a;
+endmodule
+```
+`always_comb`等价于`always@(*)`,当赋值语句右边改变再去进行计算，此外，`always_comb`内的代码必须是组合逻辑的
+
+阻塞赋值和非阻塞赋值
+对于组合逻辑来说使用阻塞赋值，而时序逻辑则使用非阻塞赋值
+在always内，阻塞赋值是顺序执行的，而非阻塞赋值是并行的
+
+两种赋值语句的准则
+
+
+阻塞赋值和非阻塞赋值
+对于组合逻辑来说使用阻塞赋值，而时序逻辑则使用非阻塞赋值
+在always内，阻塞赋值是顺序执行的，而非阻塞赋值是并行的
+
+两种赋值语句的准则
+1. 在always内对时序电路使用 非阻塞赋值
+2. 对简单的组合逻辑电路使用 连续赋值
+3. 用always来实现一些复杂的组合逻辑(SystemVerilog 中使用always_comb)
+4. 在always内和 连续赋值语句中不能对一个信号重复赋值
