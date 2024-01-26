@@ -496,3 +496,71 @@ bread 调用bget 获取buffer，如果block已经被cache了，就返回对应bu
 
 每个disk sector只能有一个buffer.
 
+
+
+### 块分配器
+文件存放在磁盘块中，磁盘块是由分配器分配的，分配器维护一个空闲块的位图，每个为代表一块，0为空闲，mkfs设置了引导扇区，超级块，日志块,inode块和位图块。
+
+块分配器用balloc寻找位图中为0的块，更新位图并返回该块。
+bfree找到正确的位图块，清除对应位。
+
+### inode
+inode有两种意思
+1. 指包含文件大小和数据块编号的磁盘上的数据结构
+2. inode指内存上的inode,包含磁盘inode的copy以及内核所需要的额外信息
+
+磁盘的inode被放在inode块的连续磁盘块内。
+磁盘中的inode由`struct dinode`定义，定义了一些文件的元数据。
+
+内核将活动的inode集合存放在`struct inode`中，iget和iput用于获得或释放inode指针，并修改refcnt.
+inode是直写的，修改了inode之后要立刻用iupdate写回磁盘,
+
+### inode实现
+ialloc类似balloc,遍历inode找到空闲的，写入type,之后调用iget，iget设置inode的相关数据，并返回该inode。bget对bcache的访问是串行的，ialloc可以进程安全。
+
+iget查找icache中对应的inode,找到就返回对其的引用，否则就记录下空inode的位置，用于分配新的inode.
+
+iput减少refcnt,释放指向inode的c指针，如果refcnt为0,则清空inode,方便下次分配使用。如果iput进来的inode没有link,refcnt为1，则需要释放inode以及其数据区域，并将文件截断为0
+
+### inode内容
+inode中的数据部分分为直接索引和间接索引
+bmap根据要读取的数据块号来进行查找块地址
+itrunc 释放文件块，先设置inode的size,然后释放直接块和间接块。
+
+bmap让readi和writei很容易实现。
+
+### 目录层
+目录实现很向文件，inode的type为`T_DIR`.
+目录有一系列entry,entry包括了name和inode编号。
+dirlookup在目录中查找dirent
+dirlink 为目录添加一个新的dirent,只有名字和inum。
+
+### 路径查找
+namei计算path并返回inode
+
+### fd层
+fd层是保证抽象文件的一层。
+fd指向的是一个`struct file`结构体，包含了inode或者管道的信息。
+ftable是全局的文件打开表，有filealloc,filedup,fileclose fileread和filewrite的函数
+filestat fileread filewrite对文件进行读写，调用下层的api比如pipe相关的api
+inode锁 的读取和写入偏移量以原子形式更新，所以对同一个文件的写不会被覆盖，而是交错的写入。
+
+### 系统调用
+syslink为一个inode创建一个新的link，目录无法link所以如果inode是目录直接返回-1：
+查找到new的父目录，然后在该目录的entry里添加一条new指向old 的inode即可
+
+create 为新inode创建一个名称。
+
+
+### logging
+```c
+begin_op()
+
+end_op
+```
+
+
+
+### real world
+实际操作系统的buffer cache比xv6复杂许多
+
