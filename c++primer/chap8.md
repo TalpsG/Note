@@ -31,7 +31,7 @@
 
 
 `unitbuf`可以使得输出流以后都立刻刷新
-```c
+```cpp
 cout << unitbuf; // 此后的输出流都立刻刷新
 cout << nounitbuf; // 回到正常的缓冲
 
@@ -44,7 +44,7 @@ cout << nounitbuf; // 回到正常的缓冲
 任何对输入流的读取，都会导致输出流先刷新。
 `cout`和`cin`就是被关联到了一起，用户的输入会先被输出。
 
-```c
+```cpp
 cin.tie(&cout);
 ostream *old = cin.tie(nullptr); //返回之前tie的输出流
 ```

@@ -13,7 +13,7 @@
 
 ### 返回this对象的函数
 成员函数可以返回自己的对象。
-```c
+```cpp
 classA &classA::foo(){
   return *this;
 }
@@ -94,7 +94,7 @@ obj1.foo().mem = 5;
 3. 成员函数定义之前的作用于查找
 
 因此一个例如下面的代码段
-```c
+```cpp
 using talps = double;
 class A{
   using talps = string;
@@ -121,7 +121,7 @@ talps A::foo(talps t){
 
 ### 委托构造函数
 委托构造函数可以在初始化列表中调用其他的构造函数来帮忙初始化该对象。
-```c
+```cpp
 class student{
   student(int a,int b,int c):a(a),b(b),c(c){}; // 常规的构造函数
 
@@ -145,7 +145,7 @@ class student{
 
 ### 隐式的类类型转换
 一言以蔽之，就是利用只有一个参数的构造函数构造一个新的对象，美其名曰类型转换。
-```c
+```cpp
 class stu{
   stu(int a){});
 }
@@ -159,7 +159,7 @@ add(1);
 对于多个参数的构造函数由于不会进行类型转换，也就不需要`explicit`了。
 
 不过即使`explicit`过了我们也可以通过强转来调用该构造函数实现隐式转换。
-```c
+```cpp
 class stu{
   explicit stu(int a){});
 }
@@ -179,7 +179,7 @@ add(static_cast<stu>(1));
 - 没有基类
 
 这样的类我们可以用列表初始化来初始化。
-```c
+```cpp
 struct data{
   int a;
   string b;

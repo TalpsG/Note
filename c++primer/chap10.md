@@ -19,7 +19,7 @@
 
 `back_inserter`:插入迭代器可以保证容器有足够空间存储输出数据,他接收容器引用，返回一个迭代器，当这个迭代器被赋值时，会调用`push_back`来添加元素。
 
-```c
+```cpp
 vector<int> vec;
 auto it = back_inserter(vec);
 *it = 42; 
@@ -55,13 +55,13 @@ fill_n(it,10,0);
 可以省略参数列表和返回值类型，但是必须保留捕获列表和函数体。
 除了函数体只有一句`return`的`lambda`返回值有类型，其他没写返回值类型的都是`void`
 
-```c
+```cpp
 [](const string &a,const string &b)->bool{
   return a.size() < b.size();
 }
 ```
 `lambda`应该可以使用本块作,用域内的变量，只是需要在捕获列表中声明`lambda`里要使用的变量，比如
-```c
+```cpp
 [sz](const string &a)->bool{
   return a.size()>sz;
 }
@@ -81,14 +81,14 @@ fill_n(it,10,0);
 
 
 隐式捕获,让编译器推断捕获列表,`=`代表值捕获，`&`为引用捕获。
-```c
+```cpp
 [=](const string &a)->bool{
   return a.size()>sz;
 }
 ```
 
 混合使用捕获
-```c
+```cpp
 [&,c]{return os << c;}
 ```
 混合使用时捕获列表必须以`=`或`&`开头来代表隐式捕获的方式，且如果隐式捕获的是`=`，则后面显式捕获只能捕获`&` 反之亦然。
@@ -104,7 +104,7 @@ fill_n(it,10,0);
 ### 参数绑定
 `bind(func,param1, p2, std::placeholder::_n,p3)`
 `bind`可以为函数固定某些参数，`_n`被称为占位符
-```c
+```cpp
 auto g = bind(f,a,b,c,_2,_1);
 g(p1,p2);
 // 等价于
