@@ -1,18 +1,13 @@
-#include <string>
-#include <unordered_map>
-std::unordered_map<int, std::string> map;
-const std::string &getValue(int key) {
-  auto iter = map.find(key);
-  if (iter != map.end()) {
-    return iter->second;
-  }
-  return "null";
-}
+#include <cstdint>
+#include <iostream>
+void test(bool b) { std::cout << "bool\n"; }
+void test(uint64_t ptr) { std::cout << "ptr\n"; }
 int main(int argc, char *argv[]) {
-  for (int i = 0; i < 100; ++i) {
-    map[i] = std::to_string(i * (i + 1));
-  }
+  void *p = NULL;
+  void *p2 = nullptr;
 
-  std::string temp = getValue(8);
+  test(p);
+  test(p2);
+
   return 0;
 }

@@ -1,0 +1,3 @@
+/home/talps/gitrepo/Note/moderncpp/template/CMakeFiles/test.dir
+/home/talps/gitrepo/Note/moderncpp/template/CMakeFiles/edit_cache.dir
+/home/talps/gitrepo/Note/moderncpp/template/CMakeFiles/rebuild_cache.dir
